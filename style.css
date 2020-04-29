@@ -1,0 +1,18 @@
+#channels .step-selector {
+    float: left;
+}
+
+#channels {
+    width: 100%;
+}
+
+.transport {
+    position: fixed;
+    bottom: 0px;
+}
+
+.transport input[type=button]
+{
+    width: 100px;
+    height: 100px;
+}
