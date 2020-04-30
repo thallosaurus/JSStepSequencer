@@ -48,14 +48,19 @@ function createInputsForChannel(stepCounter = 16)
 {
     //create the channel strip which holds all inputs
     let channelStrip = document.createElement("div");
+    channelStrip.className = "channel-strip";
     channelStrip.dataset.id = getStepSequencerCount();
     channelStrip.dataset.type = STEPSEQUENCER;
 
-    let steps = document.createElement("div");
+    let steps = document.createElement("span");
     steps.className = "step-selector";
 
     for (let i = 0; i < stepCounter; i++)
     {
+        //for custom checkbox support
+        let label = document.createElement("label");
+        label.className = "chk-container";
+
         let tmpInput = document.createElement("input");
         tmpInput.type = "checkbox";
         tmpInput.dataset.step = i;
@@ -63,14 +68,20 @@ function createInputsForChannel(stepCounter = 16)
         tmpInput.dataset.buttonType = STEPSEQUENCER;
 
         tmpInput.addEventListener("change", stepClickHandler);
-        steps.append(tmpInput);
+        label.append(tmpInput);
+
+        let checkmarkCustomStyle = document.createElement("span");
+        checkmarkCustomStyle.className = "checkmark";
+        label.append(checkmarkCustomStyle);
+
+        steps.append(label);
     }
     channelStrip.append(steps);
 
     createStepSequencerBackend(channelStrip);
 
     //add midi channel selector
-    let channelSettings = document.createElement("div");
+    let channelSettings = document.createElement("span");
     channelSettings.className = "channel-settings";
     channelSettings.append(createMidiSelector(getStepSequencerCount()));
 

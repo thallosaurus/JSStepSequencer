@@ -10,7 +10,7 @@ let bpm = 128;
 
 let noteTimer = 0;
 
-let midiDeviceIndex = 0;
+let midiDeviceIndex = -1;
 
 function play(e)
 {
@@ -27,6 +27,7 @@ function play(e)
             playStep();
             qu++;            
         }
+        updateTransportShow(noteTimer);
 
         //let quarterNote = 60000 / bpm;
         //if (relativeTime % quarterNote > 0)
@@ -35,6 +36,7 @@ function play(e)
     {
         qu = 0;
     }
+    //console.log(qu);
     requestAnimationFrame(play);
 }
 
@@ -48,7 +50,10 @@ function playStep()
             //MIDI Implementation here:
             let note = channels[e].getMidiNote();
             console.log(note.note, note.midiChannel, note.velocity);
-            WebMidi.outputs[midiDeviceIndex].playNote(note.note, note.midiChannel, note.velocity);
+            if (midiDeviceIndex != -1)
+            {
+                WebMidi.outputs[midiDeviceIndex].playNote(note.note, note.midiChannel, note.velocity);
+            }
         }
     }
     advanceStep();
@@ -116,6 +121,10 @@ function initMidi()
 
         document.querySelectorAll("[data-role='device']").forEach((e) => {
             createDeviceDropdown(e, WebMidi);
+            if (WebMidi.outputs.length == 0)
+            {
+                e.disabled = true;
+            }
             e.addEventListener("change", changeDevice);
         });
     });
@@ -123,17 +132,36 @@ function initMidi()
 
 function createDeviceDropdown(origin, midi)
 {
-    for (let e = 0; e < midi.outputs.length; e++) {
-        console.log(midi.outputs);
+    if (WebMidi.outputs.length != 0)
+    {
+        for (let e = 0; e < midi.outputs.length; e++) {
+            console.log(midi.outputs);
+            let option = document.createElement("option");
+            option.value = e;
+            option.innerText = midi.outputs[e].name;
+            origin.append(option);
+        };
+    }
+    else
+    {
         let option = document.createElement("option");
-        option.value = e;
-        option.innerText = midi.outputs[e].name;
+        option.value = -1;
+        option.innerText = "--no devices available--";
         origin.append(option);
-    };
+    }
 }
 
 function changeDevice(e)
 {
     console.log(e.srcElement);
     midiDeviceIndex = getSelectedOption(e.srcElement);
+}
+
+function updateTransportShow(val)
+{
+    document.querySelectorAll("[data-role='position-view']")
+    .forEach((e) => {
+        let pos = qu * ((60000 / bpm) / 4);
+        console.log(pos / 16, qu);
+    });
 }

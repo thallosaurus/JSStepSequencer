@@ -16,7 +16,9 @@ class Channel
 
         this.steps = new Array(this.stepCount);
 
-        this.internalStepPointer = 0;
+        //this.internalStepPointer = 0;
+
+        this.internalStepPointer = qu % this.stepCount;
 
         this.midiChannel = 1;
 
@@ -38,11 +40,14 @@ class Channel
 
     next()
     {
-        this.refreshActiveStep();
-        this.internalStepPointer++;
-        if (this.internalStepPointer > this.stepCount - 1)
+        
+        if (this.internalStepPointer == this.stepCount - 1)
         {
             this.resetInternalCounters();
+        }
+        else
+        {
+            this.internalStepPointer++;
         }
 
         return this.internalStepPointer;
@@ -51,12 +56,15 @@ class Channel
     resetInternalCounters()
     {
         this.internalStepPointer = 0;
+        //this.internalStepPointer = qu % this.stepCount;
+        //this.resetActiveStepIndicator();
     }
 
     getCurrentStep()
     {
-        console.log(this.internalStepPointer);
-        return this.steps[this.internalStepPointer].play;
+        //console.log(this.internalStepPointer);
+        this.resetActiveStepIndicator();
+        return this.steps[this.internalStepPointer].playState;
     }
 
     setMidiChannel(channel)
@@ -83,18 +91,47 @@ class Channel
         }
     }
 
-    refreshActiveStep()
+    /*refreshActiveStepIndicator()
     {
-        for (let e = 0; e < this.stepSelectorElement.length; e++)
+        /*for (let e = 0; e < this.stepSelectorElement.length; e++)
         {
             //console.log(this.stepSelectorElement[e])
-            this.stepSelectorElement[e].disabled = false;
+            this.stepSelectorElement[e].dataset.playing = false;
 
-            if (this.stepSelectorElement[e].dataStep == this.internalStepPointer)
+            console.log(this.stepSelectorElement[e]);
+
+            if (this.stepSelectorElement[e].dataset.step == this.internalStepPointer)
             {
-                this.stepSelectorElement[e].disabled == true;
+                console.log(this.internalStepPointer);
+                this.stepSelectorElement[e].dataset.playing = true;
             }
-        };
+        };*/
+        /*for (let i = 0; i < this.steps.length; i++)
+        {
+            //console.log(this.steps[i].getAssociatedElement().dataset);
+            this.steps[i].getAssociatedElement().dataset.playing = false;
+
+            if (this.steps[i].getAssociatedElement().dataset.step == this.internalStepPointer)
+            {
+                this.steps[i].getAssociatedElement().dataset.playing = true;
+            }*
+        }*
+
+        console.log(this.internalStepPointer);
+        this.resetActiveStepIndicator();
+        this.steps[this.internalStepPointer].getAssociatedElement().dataset.playing = true;
+
+        
+        debugger;*
+    }*/
+
+    resetActiveStepIndicator()
+    {
+        for (let i = 0; i < this.steps.length; i++)
+        {
+            //console.log(this.steps[i].getAssociatedElement().dataset);
+            this.steps[i].getAssociatedElement().dataset.playing = false;
+        }
     }
 }
 
@@ -102,7 +139,7 @@ class Step
 {
     constructor(htmlElement = null)
     {
-        this.associatedElement = htmlElement;
+        this.associatedElement = htmlElement.querySelector("input[type='checkbox']");
         this.play = false;
         this.associatedElement.checked = this.play;
     }
@@ -111,6 +148,17 @@ class Step
     {
         this.play = this.play ? false : true;
         this.associatedElement.checked = this.play;
+    }
+
+    getAssociatedElement()
+    {
+        return this.associatedElement;
+    }
+
+    get playState()
+    {
+        this.associatedElement.dataset.playing = true;
+        return this.play;
     }
 }
 
