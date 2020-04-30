@@ -26,6 +26,8 @@ let midiClockStopped = true;
 
 let midiOverrideDebug = true;
 
+let transportViewShowTime = false;
+
 function play(e)
 {
     ts = e;
@@ -79,6 +81,11 @@ function initTransport(elements)
         e.querySelectorAll("input[type='radio']").forEach((f) => {
             f.addEventListener("change", changeSpeed);
         });        
+    });
+
+    document.querySelectorAll("[data-role='position-view']")
+    .forEach((e) => {
+        e.addEventListener("click", switchTransportView);
     });
 }
 
@@ -171,17 +178,34 @@ function changeDevice(e)
     midiDeviceIndex = getSelectedOption(e.srcElement);
 }
 
-let transportDisplay = [1, 1];
+function switchTransportView()
+{
+    transportViewShowTime = !transportViewShowTime;
+}
+
+//let transportDisplay = [1, 1];
 
 function updateTransportShow(val)
 {
     document.querySelectorAll("[data-role='position-view']")
     .forEach((e) => {
-        let bigNumber = Math.floor(val / ((60000 / bpm) / 0.25));
-        let middleNumber = Math.floor(val / ((60000 / bpm) / 1));
-        let remainder = (val / (60000 / bpm) % 1) * 1000;
-        
-        e.value = bigNumber + "." + (middleNumber % 4) + "." + zero(Math.floor(remainder));
+        if (!transportViewShowTime)
+        {
+            let bigNumber = Math.floor(val / ((60000 / bpm) / 0.25));
+            let middleNumber = Math.floor(val / ((60000 / bpm) / 1));
+            let remainder = (val / (60000 / bpm) % 1) * 1000;
+            
+            e.value = bigNumber + "." + (middleNumber % 4) + "." + zero(Math.floor(remainder));
+        }
+        else
+        {
+            let milliseconds = Math.floor(val % 1000);
+            let seconds = Math.floor((val / 1000) % 60);
+            let minutes = Math.floor((val / 60000) % 60);
+            let hours = minutes / 60;
+
+            e.value = zeroTime(hours) + ":" + zeroTime(minutes) + ":" + zeroTime(seconds) + "." + zero(milliseconds);
+        }
     });
     
 }
@@ -202,6 +226,17 @@ function zero(num)
         return "0" + num;
     } else {
         return num;
+    }
+}
+
+function zeroTime(num)
+{
+    if (num < 10)
+    {
+        return "0" + num;
+    } else
+    {
+        return num + "";
     }
 }
 
