@@ -1,6 +1,8 @@
 let playing = false;
 let playButtonElem = null;
 
+let animClockId = null;
+
 let ts = 0;
 let lastPlayPress = 0;
 let relativeTime = 0;
@@ -12,6 +14,18 @@ let noteTimer = 0;
 
 let midiDeviceIndex = -1;
 
+let resolution = 4;
+
+let midiClockBeat = false;
+let midiClockDelta = 0;
+
+//clock resolution in ppq 
+let midiClockResolution = 48;
+
+let midiClockStopped = true;
+
+let midiOverrideDebug = true;
+
 function play(e)
 {
     ts = e;
@@ -19,25 +33,23 @@ function play(e)
     if (playing)
     {
         relativeTime = e - lastPlayPress;
-        //console.log("play");
         noteTimer = relativeTime;
 
-        if (noteTimer > qu * ((60000 / bpm) / 4))
+        sendMidiClock(relativeTime);
+
+        if (noteTimer > qu * ((60000 / bpm) / resolution))
         {
             playStep();
             qu++;            
         }
-        updateTransportShow(noteTimer);
-
-        //let quarterNote = 60000 / bpm;
-        //if (relativeTime % quarterNote > 0)
+        updateTransportShow(relativeTime);
     }
     else
     {
         qu = 0;
+        stopMidiClock();
     }
-    //console.log(qu);
-    requestAnimationFrame(play);
+    animClockId = requestAnimationFrame(play);
 }
 
 function playStep()
@@ -50,10 +62,7 @@ function playStep()
             //MIDI Implementation here:
             let note = channels[e].getMidiNote();
             console.log(note.note, note.midiChannel, note.velocity);
-            if (midiDeviceIndex != -1)
-            {
-                WebMidi.outputs[midiDeviceIndex].playNote(note.note, note.midiChannel, note.velocity);
-            }
+            sendMidiNote(note);
         }
     }
     advanceStep();
@@ -63,7 +72,14 @@ function initTransport(elements)
 {
     playButtonElem = elements;
     initMidi();
-    requestAnimationFrame(play);
+    animClockId = requestAnimationFrame(play);
+
+    document.querySelectorAll("[data-role='speed']")
+    .forEach((e) => {
+        e.querySelectorAll("input[type='radio']").forEach((f) => {
+            f.addEventListener("change", changeSpeed);
+        });        
+    });
 }
 
 function playButton()
@@ -117,8 +133,6 @@ function initMidi()
 
         console.log(WebMidi.outputs);
 
-        //output = WebMidi.outputs[1];
-
         document.querySelectorAll("[data-role='device']").forEach((e) => {
             createDeviceDropdown(e, WebMidi);
             if (WebMidi.outputs.length == 0)
@@ -157,11 +171,85 @@ function changeDevice(e)
     midiDeviceIndex = getSelectedOption(e.srcElement);
 }
 
+let transportDisplay = [1, 1];
+
 function updateTransportShow(val)
 {
     document.querySelectorAll("[data-role='position-view']")
     .forEach((e) => {
-        let pos = qu * ((60000 / bpm) / 4);
-        console.log(pos / 16, qu);
+        let bigNumber = Math.floor(val / ((60000 / bpm) / 0.25));
+        let middleNumber = Math.floor(val / ((60000 / bpm) / 1));
+        let remainder = (val / (60000 / bpm) % 1) * 1000;
+        
+        e.value = bigNumber + "." + (middleNumber % 4) + "." + zero(Math.floor(remainder));
     });
+    
+}
+
+function changeSpeed(e)
+{
+    resolution = parseInt(e.srcElement.dataset.speed);
+    console.log(resolution);
+}
+
+function zero(num)
+{
+    if (num < 10)
+    {
+        return "00" + num;
+    } else if (num < 100)
+    {
+        return "0" + num;
+    } else {
+        return num;
+    }
+}
+
+function sendMidiClock(time)
+{
+    let tick = ((60000 / bpm)) / midiClockResolution;
+
+    //Send Clock Start Signal
+    if (midiClockDelta == 0)
+    {
+        console.log("MIDI Clock Start");
+        sendMidiMessage([0xFA]);
+        midiClockStopped = false;
+    }
+
+    if (time > midiClockDelta * tick)
+    {
+        //send here
+        sendMidiMessage([0xF8]);
+        midiClockDelta++;
+    }
+}
+
+function stopMidiClock()
+{
+    if (midiClockStopped == false)
+    {
+        console.log("MIDI Clock Stop");
+        sendMidiMessage([0xF8]);
+        midiClockDelta = 0;
+        midiClockStopped = true;
+    }
+}
+
+function sendMidiNote(note)
+{
+    console.log(note);
+
+    if (midiDeviceIndex != -1)
+    {
+        WebMidi.outputs[midiDeviceIndex].playNote(note.note, note.midiChannel, note.velocity);
+    }
+}
+
+function sendMidiMessage(msg)
+{
+    if (midiDeviceIndex != -1)
+    {
+        WebMidi.outputs[midiDeviceIndex].send(msg);
+    }
 }

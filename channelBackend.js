@@ -16,15 +16,13 @@ class Channel
 
         this.steps = new Array(this.stepCount);
 
-        //this.internalStepPointer = 0;
-
         this.internalStepPointer = qu % this.stepCount;
 
         this.midiChannel = 1;
 
         console.log(strip);
 
-        this.note = "C5";
+        this.note = 35;
 
         for (let i = 0; i < this.stepSelectorElement.length; i++)
         {
@@ -200,9 +198,9 @@ function setChannelNote(id, note)
 
 function setChannelNoteUi(e)
 {
-    let note = e.srcElement.value;
+    let note = parseInt(getSelectedOption(e.srcElement));
     let channelId = e.srcElement.parentElement.parentElement.dataset.id;
-    console.log(e.srcElement);
+    
     setChannelNote(channelId, note);
 }
 

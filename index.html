@@ -7,6 +7,7 @@
 
     <link rel="stylesheet" href="style.css">
 
+    <script src="noteData.js"></script>
     <script src="main.js"></script>
     <script src="channelBackend.js"></script>
     <script src="transport.js"></script>
@@ -17,8 +18,23 @@
     <input type="button" id="addNewStepSequencer" value="+" title="Add new Sequencer">
     <div class="transport">
         <input type="button" value="Play" data-role="playbutton" onclick="playButton()">
-        <input type="text" data-role="position-view" disabled>
-        <input type="number" value="128" data-role="bpm" onchange="changeBpm(this)">
+        <input type="text" data-role="position-view" value="0.0.000" disabled>
+        <input type="number" min=30 max=999 value="128" data-role="bpm" onchange="changeBpm(this)">
+        
+        <form data-role="speed">
+            <input type="radio" id="halftime" name="speed" data-speed="2">
+            <label for="halftime">Halftime</label>
+
+            <input type="radio" id="normal" name="speed" data-speed="4" checked>
+            <label for="normal">Normal</label>
+
+            <input type="radio" id="doubletime" name="speed" data-speed="8">
+            <label for="doubletime">Doubletime</label>
+
+            <input type="radio" id="quatrotime" name="speed" data-speed="16">
+            <label for="quatrotime">Quatrotime</label>
+        </form>
+
         <select data-role="device"></select>
     </div>
 </body>

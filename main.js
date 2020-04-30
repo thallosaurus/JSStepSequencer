@@ -6,10 +6,10 @@ window.onload = function()
 {
     console.log("Hello World!");
     this.document.getElementById("addNewStepSequencer")
-        .addEventListener("click", this.appendNewSequencer);
+        .addEventListener("click", (e) => {this.appendNewSequencer()});
 
     //Append a new Sequencer on start
-    appendNewSequencer();
+    appendNewSequencer(16);
 
     initTransport(document.querySelectorAll("[data-role='playbutton']"));
 }
@@ -19,13 +19,18 @@ function getStepSequencerCount()
     return stepSequencerCount;
 }
 
-function appendNewSequencer()
+function appendNewSequencer(c)
 {
-    document.querySelectorAll("span#channels")
-    .forEach((e) => {
-        e.append(createInputsForChannel());
-        stepSequencerCount = ++e.dataset.sequencers;
-    });
+    console.log(c);
+    let stepCounter = c != undefined ? c : parseInt(prompt("How many channels?", 16));
+    if (stepCounter != NaN)
+    {
+        document.querySelectorAll("span#channels")
+        .forEach((e) => {
+            e.append(createInputsForChannel(stepCounter));
+            stepSequencerCount = ++e.dataset.sequencers;
+        });
+    }
 }
 
 function deleteSpecificSequencer(id)
@@ -68,6 +73,7 @@ function createInputsForChannel(stepCounter = 16)
         tmpInput.dataset.buttonType = STEPSEQUENCER;
 
         tmpInput.addEventListener("change", stepClickHandler);
+        //tmpInput.addEventListener("dblclick", changeVelocity);
         label.append(tmpInput);
 
         let checkmarkCustomStyle = document.createElement("span");
@@ -85,8 +91,8 @@ function createInputsForChannel(stepCounter = 16)
     channelSettings.className = "channel-settings";
     channelSettings.append(createMidiSelector(getStepSequencerCount()));
 
-    let noteSelector = document.createElement("input");
-    noteSelector.value = "C5";
+    let noteSelector = createNoteDropdown("C2");
+    //noteSelector.value = "C5";
     noteSelector.addEventListener("change", setChannelNoteUi);
     channelSettings.append(noteSelector);
 
@@ -150,5 +156,29 @@ function createMidiSelector(id ,preselectedChannel = 0)
 
     select.addEventListener("change", setMidiChannelUi);
 
+    return select;
+}
+
+function changeVelocity(e)
+{
+    console.log("Double Click");
+}
+
+function createNoteDropdown(preselect)
+{
+    let select = document.createElement("select");
+    select.dataset.id = getStepSequencerCount();
+    for(let i = midiData.length - 1; i >= 0; i--)
+    {
+        let option = document.createElement("option");
+        option.value = i;
+        option.innerText = midiData[i];
+
+        if (midiData[i] == preselect)
+        {
+            option.selected = "true";
+        }
+        select.append(option);
+    }
     return select;
 }

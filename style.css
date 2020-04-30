@@ -23,6 +23,27 @@
     height: 30px;
 }
 
+form[data-role="speed"]
+{
+    display:inline-block;
+}
+
+[data-role='position-view'] {
+    /* height: 90px; */
+    width: auto;
+    font-size: 50px;
+    position: relative;
+    bottom: 0;
+}
+
+[data-role='bpm'] {
+    /* height: 90px; */
+    width: 100px;
+    font-size: 50px;
+    position: relative;
+    bottom: 0;
+}
+
 /* Custom Checkboxes */
 /* Customize the label (the container) */
 .chk-container {
@@ -55,6 +76,8 @@
     height: 25px;
     width: 25px;
     background-color: #eee;
+
+    transition: background-color .1s;
   }
   
   /* On mouse-over, add a grey background color */
@@ -64,7 +87,7 @@
   
   /* When the checkbox is checked, add a blue background */
   .chk-container input:checked ~ .checkmark {
-    background-color: #2196F3;
+    background-color: #4d4d4d /*#2196F3*/;
   }
 
   /*When the checkbox is played, use this */
@@ -85,7 +108,7 @@
   }
   
   /* Style the checkmark/indicator */
-  .chk-container .checkmark:after {
+  /*.chk-container .checkmark:after {
     left: 9px;
     top: 5px;
     width: 5px;
@@ -95,4 +118,24 @@
     -webkit-transform: rotate(45deg);
     -ms-transform: rotate(45deg);
     transform: rotate(45deg);
+  }*/
+
+  .chk-container .checkmark:after {
+    left: 25%;
+    top: 60%;
+    width: 11.5px;
+    height: 3px;
+    border: 1px solid white;
+    border-radius: 45px;
+    background-color: white;
+  }
+
+  .fourth .checkmark:before {
+      display: block;
+      left: 0px;
+      top: 0px;
+      width:3px;
+      height:3px;
+      border: 1px solid white;
+      border-radius: 90;
   }
